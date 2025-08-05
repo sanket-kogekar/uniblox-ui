@@ -3,6 +3,7 @@ import ProductList from './components/ProductList'
 import Cart from './components/Cart'
 import AdminPanel from './components/AdminPanel'
 import './App.css'
+const BASE_URL = import.meta.env.VITE_API_BASE_URL;
 
 function App() {
   const [cart, setCart] = useState([])
