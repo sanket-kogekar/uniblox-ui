@@ -31,7 +31,7 @@ function App() {
 
   const addToCart = async (product) => {
     try {
-      const response = await fetch('/api/cart/add', {
+      const response = await fetch(`${BASE_URL}/api/cart/add`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -97,7 +97,7 @@ function App() {
         discountCode: discountCode.trim()
       }
 
-      const response = await fetch('/api/checkout', {
+      const response = await fetch(`${BASE_URL}/api/checkout`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -125,7 +125,7 @@ function App() {
 
   const fetchAdminStats = async () => {
     try {
-      const response = await fetch('/api/admin/stats')
+      const response = await fetch(`${BASE_URL}/api/admin/stats`)
       if (response.ok) {
         const stats = await response.json()
         setAdminStats(stats)
@@ -137,7 +137,7 @@ function App() {
 
   const generateDiscountCode = async () => {
     try {
-      const response = await fetch('/api/admin/generate-discount', {
+      const response = await fetch(`${BASE_URL}/api/admin/generate-discount`, {
         method: 'POST',
       })
       
