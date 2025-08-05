@@ -38,7 +38,7 @@ function App() {
           'Content-Type': 'application/json',
         },
         body: JSON.stringify({
-          item_id: product.id,
+          item_id: String(product.id), // must be string
           name: product.name,
           price: product.price,
           quantity: 1
@@ -60,7 +60,8 @@ function App() {
         })
         showMessage(`${product.name} added to cart!`)
       } else {
-        throw new Error('Failed to add item to cart')
+        const errorResult = await response.json()
+        showMessage(errorResult.error || 'Failed to add item to cart', 'error')
       }
     } catch (error) {
       showMessage('Error adding item to cart', 'error')
