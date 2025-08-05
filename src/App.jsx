@@ -3,14 +3,15 @@ import ProductList from './components/ProductList'
 import Cart from './components/Cart'
 import AdminPanel from './components/AdminPanel'
 import './App.css'
-const BASE_URL = import.meta.env.VITE_API_BASE_URL;
+
+const BASE_URL = import.meta.env.VITE_API_BASE_URL
+const USER_ID = 'demo-user' // Replace with actual user ID if needed
 
 function App() {
   const [cart, setCart] = useState([])
   const [message, setMessage] = useState({ text: '', type: '' })
   const [adminStats, setAdminStats] = useState(null)
 
-  // Mock products data - in real app this would come from API
   const [products] = useState([
     { id: 1, name: 'Laptop', price: 999.99, description: 'High-performance laptop' },
     { id: 2, name: 'Smartphone', price: 699.99, description: 'Latest smartphone' },
@@ -20,7 +21,6 @@ function App() {
     { id: 6, name: 'Camera', price: 799.99, description: 'Digital camera' },
   ])
 
-  // Load admin stats on component mount
   useEffect(() => {
     fetchAdminStats()
   }, [])
@@ -32,13 +32,13 @@ function App() {
 
   const addToCart = async (product) => {
     try {
-      const response = await fetch(`${BASE_URL}/api/cart/add`, {
+      const response = await fetch(`${BASE_URL}/cart/${USER_ID}/items`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
         },
         body: JSON.stringify({
-          productId: product.id,
+          item_id: product.id,
           name: product.name,
           price: product.price,
           quantity: 1
@@ -78,7 +78,7 @@ function App() {
       removeFromCart(productId)
       return
     }
-    
+
     setCart(prev => prev.map(item => 
       item.id === productId 
         ? { ...item, quantity: newQuantity }
@@ -89,16 +89,10 @@ function App() {
   const checkout = async (discountCode = '') => {
     try {
       const orderData = {
-        items: cart.map(item => ({
-          productId: item.id,
-          name: item.name,
-          price: item.price,
-          quantity: item.quantity
-        })),
-        discountCode: discountCode.trim()
+        discount_code: discountCode.trim()
       }
 
-      const response = await fetch(`${BASE_URL}/api/checkout`, {
+      const response = await fetch(`${BASE_URL}/cart/${USER_ID}/checkout`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -111,11 +105,11 @@ function App() {
       if (response.ok) {
         setCart([])
         showMessage(`Order placed successfully! ${result.discountApplied ? `Discount applied: ${result.discountAmount}` : ''}`)
-        fetchAdminStats() // Refresh admin stats after successful order
+        fetchAdminStats()
         return { success: true, ...result }
       } else {
-        showMessage(result.message || 'Checkout failed', 'error')
-        return { success: false, message: result.message }
+        showMessage(result.error || 'Checkout failed', 'error')
+        return { success: false, message: result.error }
       }
     } catch (error) {
       showMessage('Error during checkout', 'error')
@@ -126,7 +120,7 @@ function App() {
 
   const fetchAdminStats = async () => {
     try {
-      const response = await fetch(`${BASE_URL}/api/admin/stats`)
+      const response = await fetch(`${BASE_URL}/admin/stats`)
       if (response.ok) {
         const stats = await response.json()
         setAdminStats(stats)
@@ -138,17 +132,17 @@ function App() {
 
   const generateDiscountCode = async () => {
     try {
-      const response = await fetch(`${BASE_URL}/api/admin/generate-discount`, {
+      const response = await fetch(`${BASE_URL}/admin/discount-codes`, {
         method: 'POST',
       })
-      
+
       const result = await response.json()
-      
+
       if (response.ok) {
-        showMessage(`Discount code generated: ${result.code}`)
-        fetchAdminStats() // Refresh stats
+        showMessage(`Discount code generated: ${result.discount_code?.code || 'N/A'}`)
+        fetchAdminStats()
       } else {
-        showMessage(result.message || 'Failed to generate discount code', 'error')
+        showMessage(result.error || 'Failed to generate discount code', 'error')
       }
     } catch (error) {
       showMessage('Error generating discount code', 'error')
